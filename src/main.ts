@@ -8,7 +8,7 @@ import {
 	PluginSettings,
 	SettingTab,
 } from './settings';
-import { inheritFrontmatter } from './inheritFrontmatter';
+import { inheritFrontmatter } from './tagSuggest';
 
 // Remember to rename these classes and interfaces!
 
@@ -33,23 +33,19 @@ export default class InheritFrontmatterPlugin extends Plugin {
 		});
 
 
-
-		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SettingTab(this.app, this));
 
 
-		this.registerEvent(
-			this.app.vault.on("create", async (file) => {
-				if (!(file instanceof TFile) || file.extension !== 'md') {
-					return;
+		this.addCommand({
+			id: 'inherit-frontmatter',
+			name: 'Inherit Frontmatter',
+			callback: async () => {
+				const activeFile = this.app.workspace.getActiveFile();
+				if (activeFile) {
+					await inheritFrontmatter(this.app, activeFile, this.settings);
 				}
-
-				if (!this.settings.enabled) {
-					return;
-				}
-				await inheritFrontmatter(this.app, file);
-			})
-		);
+			},
+		});
 	}
 
 
